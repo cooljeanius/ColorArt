@@ -1,1 +1,9 @@
+*.DS_Store
+*/build/*
+build
+*.build
+*.perspectivev3
+*.pbxuser
+*.xcuser*
+*.xcworkspace*
 xcuserdata
