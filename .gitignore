@@ -6,4 +6,6 @@ build
 *.pbxuser
 *.xcuser*
 *.xcworkspace*
+*/project.xcworkspace
 xcuserdata
+*/xcuserdata/*
