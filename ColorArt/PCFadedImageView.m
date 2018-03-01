@@ -40,6 +40,7 @@
 	NSGradient *gradient = [[[NSGradient alloc] initWithColorsAndLocations:backgroundColor, 0.0, backgroundColor, .01, [backgroundColor colorWithAlphaComponent:0.05], 1.0, nil] autorelease];
 
 	[gradient drawInRect:imageRect angle:0.0];
+	(void)dirtyRect;
 }
 
 

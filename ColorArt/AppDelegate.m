@@ -5,14 +5,28 @@
  *
  * Copyright (C) 2012 Panic Inc. Code by Wade Cosgrove. All rights reserved.
  *
- * Redistribution and use, with or without modification, are permitted provided that the following conditions are met:
+ * Redistribution and use, with or without modification, are permitted provided
+ * that the following conditions are met:
  *
- * - Redistributions must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ * - Redistributions must reproduce the above copyright notice, this list of
+ *   conditions and the following disclaimer in the documentation and/or other
+ *   materials provided with the distribution.
  *
- * - Neither the name of Panic Inc nor the names of its contributors may be used to endorse or promote works derived from this software without specific prior written permission from Panic Inc.
+ * - Neither the name of Panic Inc nor the names of its contributors may be used
+ *   to endorse or promote works derived from this software without specific
+ *   prior written permission from Panic Inc.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL PANIC INC BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.
+ * IN NO EVENT SHALL PANIC INC BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
@@ -29,7 +43,7 @@
 
 - (IBAction)chooseImage:(id)sender
 {
-	NSOpenPanel* openPanel = [NSOpenPanel openPanel];
+	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
 
 	[openPanel setCanChooseFiles:YES];
 	[openPanel setAllowsMultipleSelection:NO];
@@ -38,12 +52,12 @@
 
 	[openPanel beginSheetModalForWindow:self.window completionHandler:^(NSInteger result)
 	{
-		if ( result == NSFileHandlingPanelOKButton )
+		if (result == NSFileHandlingPanelOKButton)
 		{
 			NSURL *url = [openPanel URL];
 
 			NSImage *image = [[NSImage alloc] initByReferencingURL:url];
-			if ( image != nil )
+			if (image != nil)
 			{
 				// scale down to 320x320 for the view
 
@@ -53,28 +67,45 @@
 				NSRect drawRect;
 
 				// make the image square
-				if ( imageSize.height > imageSize.width )
+				if (imageSize.height > imageSize.width)
 				{
-					drawRect = NSMakeRect(0, imageSize.height - imageSize.width, imageSize.width, imageSize.width);
+					drawRect = NSMakeRect(0,
+							      (imageSize.height
+							       - imageSize.width),
+							      imageSize.width,
+							      imageSize.width);
 				}
 				else
 				{
-					drawRect = NSMakeRect(0, 0, imageSize.height, imageSize.height);
+					drawRect = NSMakeRect(0, 0,
+							      imageSize.height,
+							      imageSize.height);
 				}
 
 				[squareImage lockFocus];
-				[image drawInRect:NSMakeRect(0, 0, imageSize.width, imageSize.width) fromRect:drawRect operation:NSCompositeSourceOver fraction:1.0];
+				[image drawInRect:NSMakeRect(0, 0,
+							     imageSize.width,
+							     imageSize.width)
+					 fromRect:drawRect
+					operation:NSCompositeSourceOver
+					 fraction:1.0];
 				[squareImage unlockFocus];
 
 				// scale the image to the desired size
 
 				[scaledImage lockFocus];
-				[squareImage drawInRect:NSMakeRect(0, 0, 320., 320.) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+				[squareImage drawInRect:NSMakeRect(0, 0,
+								   320., 320.)
+					       fromRect:NSZeroRect
+					      operation:NSCompositeSourceOver
+					       fraction:1.0];
 				[scaledImage unlockFocus];
 
 				// convert back to readable bitmap data
 
-				CGImageRef cgImage = [scaledImage CGImageForProposedRect:NULL context:nil hints:nil];
+				CGImageRef cgImage = [scaledImage CGImageForProposedRect:NULL
+										 context:nil
+										   hints:nil];
 				NSBitmapImageRep *bitmapRep = [[[NSBitmapImageRep alloc] initWithCGImage:cgImage] autorelease];
 				NSImage *finalImage = [[[NSImage alloc] initWithSize:scaledImage.size] autorelease];
 				[finalImage addRepresentation:bitmapRep];
@@ -86,42 +117,48 @@
 			}
 		}
 	}];
+	(void)sender;
 }
 
 
 - (void)analizeImage:(NSImage*)anImage
 {
 	NSCountedSet *imageColors = nil;
-	NSColor *backgroundColor = [self findEdgeColor:anImage imageColors:&imageColors];
+	NSColor *backgroundColor = [self findEdgeColor:anImage
+					   imageColors:&imageColors];
 	NSColor *primaryColor = nil;
 	NSColor *secondaryColor = nil;
 	NSColor *detailColor = nil;
 	BOOL darkBackground = [backgroundColor pc_isDarkColor];
 
-	[self findTextColors:imageColors primaryColor:&primaryColor secondaryColor:&secondaryColor detailColor:&detailColor backgroundColor:backgroundColor];
+	[self findTextColors:imageColors
+		primaryColor:&primaryColor
+	      secondaryColor:&secondaryColor
+		 detailColor:&detailColor
+	     backgroundColor:backgroundColor];
 
-	if ( primaryColor == nil )
+	if (primaryColor == nil)
 	{
 		NSLog(@"missed primary");
-		if ( darkBackground )
+		if (darkBackground)
 			primaryColor = [NSColor whiteColor];
 		else
 			primaryColor = [NSColor blackColor];
 	}
 
-	if ( secondaryColor == nil )
+	if (secondaryColor == nil)
 	{
 		NSLog(@"missed secondary");
-		if ( darkBackground )
+		if (darkBackground)
 			secondaryColor = [NSColor whiteColor];
 		else
 			secondaryColor = [NSColor blackColor];
 	}
 
-	if ( detailColor == nil )
+	if (detailColor == nil)
 	{
 		NSLog(@"missed detail");
-		if ( darkBackground )
+		if (darkBackground)
 			detailColor = [NSColor whiteColor];
 		else
 			detailColor = [NSColor blackColor];
@@ -140,7 +177,7 @@
 {
 	NSBitmapImageRep *imageRep = [[image representations] lastObject];
 
-	if ( ![imageRep isKindOfClass:[NSBitmapImageRep class]] ) // sanity check
+	if (![imageRep isKindOfClass:[NSBitmapImageRep class]]) // sanity check
 		return nil;
 
 	NSInteger pixelsWide = [imageRep pixelsWide];
@@ -149,13 +186,13 @@
 	NSCountedSet *imageColors = [[NSCountedSet alloc] initWithCapacity:pixelsWide * pixelsHigh];
 	NSCountedSet *leftEdgeColors = [[NSCountedSet alloc] initWithCapacity:pixelsHigh];
 
-	for ( NSUInteger x = 0; x < pixelsWide; x++ )
+	for (NSUInteger x = 0; x < pixelsWide; x++)
 	{
-		for ( NSUInteger y = 0; y < pixelsHigh; y++ )
+		for (NSUInteger y = 0; y < pixelsHigh; y++)
 		{
 			NSColor *color = [imageRep colorAtX:x y:y];
 
-			if ( x == 0 )
+			if (x == 0)
 			{
 				[leftEdgeColors addObject:color];
 			}
@@ -171,14 +208,16 @@
 	NSColor *curColor = nil;
 	NSMutableArray *sortedColors = [NSMutableArray arrayWithCapacity:[leftEdgeColors count]];
 
-	while ( (curColor = [enumerator nextObject]) != nil )
+	while ((curColor = [enumerator nextObject]) != nil)
 	{
 		NSUInteger colorCount = [leftEdgeColors countForObject:curColor];
 
-		if ( colorCount <= 2 ) // prevent using random colors, threshold should be based on input image size
+		// prevent using random colors, threshold should be based on input image size:
+		if (colorCount <= 2)
 			continue;
 
-		PCCountedColor *container = [[PCCountedColor alloc] initWithColor:curColor count:colorCount];
+		PCCountedColor *container = [[PCCountedColor alloc] initWithColor:curColor
+									    count:colorCount];
 
 		[sortedColors addObject:container];
 		[container release];
@@ -189,19 +228,21 @@
 
 	PCCountedColor *proposedEdgeColor = nil;
 
-	if ( [sortedColors count] > 0 )
+	if ([sortedColors count] > 0)
 	{
 		proposedEdgeColor = [sortedColors objectAtIndex:0];
 
-		if ( [proposedEdgeColor.color pc_isBlackOrWhite] ) // want to choose color over black/white so we keep looking
+		// want to choose color over black/white so we keep looking:
+		if ([proposedEdgeColor.color pc_isBlackOrWhite])
 		{
-			for ( NSInteger i = 1; i < [sortedColors count]; i++ )
+			for (NSInteger i = 1; i < [sortedColors count]; i++)
 			{
 				PCCountedColor *nextProposedColor = [sortedColors objectAtIndex:i];
 
-				if (((double)nextProposedColor.count / (double)proposedEdgeColor.count) > .3 ) // make sure the second choice color is 30% as common as the first choice
+				// make sure the second choice color is 30% as common as the first choice:
+				if (((double)nextProposedColor.count / (double)proposedEdgeColor.count) > .3)
 				{
-					if ( ![nextProposedColor.color pc_isBlackOrWhite] )
+					if (![nextProposedColor.color pc_isBlackOrWhite])
 					{
 						proposedEdgeColor = nextProposedColor;
 						break;
@@ -216,6 +257,7 @@
 		}
 	}
 
+	[leftEdgeColors release];
 	return proposedEdgeColor.color;
 }
 
@@ -227,18 +269,23 @@
 	NSMutableArray *sortedColors = [NSMutableArray arrayWithCapacity:[colors count]];
 	BOOL findDarkTextColor = ![backgroundColor pc_isDarkColor];
 
-	while ( (curColor = [enumerator nextObject]) != nil )
+	while ((curColor = [enumerator nextObject]) != nil)
 	{
-		curColor = [curColor pc_colorWithMinimumSaturation:.15]; // make sure color isn't too pale or washed out
+		// make sure color isn't too pale or washed out:
+		curColor = [curColor pc_colorWithMinimumSaturation:.15];
 
-		if ( [curColor pc_isDarkColor] == findDarkTextColor )
+		if ([curColor pc_isDarkColor] == findDarkTextColor)
 		{
 			NSUInteger colorCount = [colors countForObject:curColor];
 
-			//if ( colorCount <= 2 ) // prevent using random colors, threshold should be based on input image size
-			//	continue;
+#if 0
+			// prevent using random colors, threshold should be based on input image size:
+			if (colorCount <= 2)
+				continue;
+#endif /* 0 */
 
-			PCCountedColor *container = [[PCCountedColor alloc] initWithColor:curColor count:colorCount];
+			PCCountedColor *container = [[PCCountedColor alloc] initWithColor:curColor
+										    count:colorCount];
 
 			[sortedColors addObject:container];
 			[container release];
@@ -247,25 +294,25 @@
 
 	[sortedColors sortUsingSelector:@selector(compare:)];
 
-	for ( PCCountedColor *curContainer in sortedColors )
+	for (PCCountedColor *curContainer in sortedColors)
 	{
 		curColor = curContainer.color;
 
-		if ( *primaryColor == nil )
+		if (*primaryColor == nil)
 		{
-			if ( [curColor pc_isContrastingColor:backgroundColor] )
+			if ([curColor pc_isContrastingColor:backgroundColor])
 				*primaryColor = curColor;
 		}
-		else if ( *secondaryColor == nil )
+		else if (*secondaryColor == nil)
 		{
-			if ( ![*primaryColor pc_isDistinct:curColor] || ![curColor pc_isContrastingColor:backgroundColor] )
+			if (![*primaryColor pc_isDistinct:curColor] || ![curColor pc_isContrastingColor:backgroundColor])
 				continue;
 
 			*secondaryColor = curColor;
 		}
-		else if ( *detailColor == nil )
+		else if (*detailColor == nil)
 		{
-			if ( ![*secondaryColor pc_isDistinct:curColor] || ![*primaryColor pc_isDistinct:curColor] || ![curColor pc_isContrastingColor:backgroundColor] )
+			if (![*secondaryColor pc_isDistinct:curColor] || ![*primaryColor pc_isDistinct:curColor] || ![curColor pc_isContrastingColor:backgroundColor])
 				continue;
 
 			*detailColor = curColor;
@@ -287,9 +334,9 @@
 
 	[convertedColor getRed:&r green:&g blue:&b alpha:&a];
 
-	CGFloat lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+	CGFloat lum = (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
 
-	if ( lum < .5 )
+	if (lum < .5)
 	{
 		return YES;
 	}
@@ -310,21 +357,21 @@
 
 	CGFloat threshold = .25; //.15
 
-	if ( fabs(r - r1) > threshold ||
-		fabs(g - g1) > threshold ||
-		fabs(b - b1) > threshold ||
-		fabs(a - a1) > threshold )
+	if ((fabs(r - r1) > threshold)
+	    || (fabs(g - g1) > threshold)
+	    || (fabs(b - b1) > threshold)
+	    || (fabs(a - a1) > threshold))
+	{
+		// check for grays, prevent multiple gray colors
+
+		if ((fabs(r - g) < .03) && (fabs(r - b) < .03))
 		{
-			// check for grays, prevent multiple gray colors
-
-			if ( fabs(r - g) < .03 && fabs(r - b) < .03 )
-			{
-				if ( fabs(r1 - g1) < .03 && fabs(r1 - b1) < .03 )
-					return NO;
-			}
-
-			return YES;
+			if ((fabs(r1 - g1) < .03) && (fabs(r1 - b1) < .03))
+				return NO;
 		}
+
+		return YES;
+	}
 
 	return NO;
 }
@@ -334,18 +381,24 @@
 {
 	NSColor *tempColor = [self colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
 
-	if ( tempColor != nil )
+	if (tempColor != nil)
 	{
 		CGFloat hue = 0.0;
 		CGFloat saturation = 0.0;
 		CGFloat brightness = 0.0;
 		CGFloat alpha = 0.0;
 
-		[tempColor getHue:&hue saturation:&saturation brightness:&brightness alpha:&alpha];
+		[tempColor getHue:&hue
+		       saturation:&saturation
+		       brightness:&brightness
+			    alpha:&alpha];
 
-		if ( saturation < minSaturation )
+		if (saturation < minSaturation)
 		{
-			return [NSColor colorWithCalibratedHue:hue saturation:minSaturation brightness:brightness alpha:alpha];
+			return [NSColor colorWithCalibratedHue:hue
+						    saturation:minSaturation
+						    brightness:brightness
+							 alpha:alpha];
 		}
 	}
 
@@ -357,16 +410,16 @@
 {
 	NSColor *tempColor = [self colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
 
-	if ( tempColor != nil )
+	if (tempColor != nil)
 	{
 		CGFloat r, g, b, a;
 
 		[tempColor getRed:&r green:&g blue:&b alpha:&a];
 
-		if ( r > .91 && g > .91 && b > .91 )
+		if ((r > .91) && (g > .91) && (b > .91))
 			return YES; // white
 
-		if ( r < .09 && g < .09 && b < .09 )
+		if ((r < .09) && (g < .09) && (b < .09))
 			return YES; // black
 	}
 
@@ -379,7 +432,7 @@
 	NSColor *backgroundColor = [self colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
 	NSColor *foregroundColor = [color colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
 
-	if ( backgroundColor != nil && foregroundColor != nil )
+	if ((backgroundColor != nil) && (foregroundColor != nil))
 	{
 		CGFloat br, bg, bb, ba;
 		CGFloat fr, fg, fb, fa;
@@ -387,17 +440,19 @@
 		[backgroundColor getRed:&br green:&bg blue:&bb alpha:&ba];
 		[foregroundColor getRed:&fr green:&fg blue:&fb alpha:&fa];
 
-		CGFloat bLum = 0.2126 * br + 0.7152 * bg + 0.0722 * bb;
-		CGFloat fLum = 0.2126 * fr + 0.7152 * fg + 0.0722 * fb;
+		CGFloat bLum = (0.2126 * br) + (0.7152 * bg) + (0.0722 * bb);
+		CGFloat fLum = (0.2126 * fr) + (0.7152 * fg) + (0.0722 * fb);
 
 		CGFloat contrast = 0.;
 
-		if ( bLum > fLum )
+		if (bLum > fLum)
 			contrast = (bLum + 0.05) / (fLum + 0.05);
 		else
 			contrast = (fLum + 0.05) / (bLum + 0.05);
 
-		//return contrast > 3.0; //3-4.5 W3C recommends a minimum ratio of 3:1
+#if 0
+		return contrast > 3.0; //3-4.5 W3C recommends a minimum ratio of 3:1
+#endif /* 0 */
 		return contrast > 1.6;
 	}
 
@@ -415,7 +470,7 @@
 {
 	self = [super init];
 
-	if ( self )
+	if (self)
 	{
 		self.color = color;
 		self.count = count;
@@ -433,13 +488,13 @@
 
 - (NSComparisonResult)compare:(PCCountedColor*)object
 {
-	if ( [object isKindOfClass:[PCCountedColor class]] )
+	if ([object isKindOfClass:[PCCountedColor class]])
 	{
-		if ( self.count < object.count )
+		if (self.count < object.count)
 		{
 			return NSOrderedDescending;
 		}
-		else if ( self.count == object.count )
+		else if (self.count == object.count)
 		{
 			return NSOrderedSame;
 		}
